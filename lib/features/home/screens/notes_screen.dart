@@ -1,8 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:session_notes/core/widgets/add_note_modal.dart';
+import 'package:session_notes/core/widgets/finish_session_modal.dart';
+import 'package:session_notes/core/widgets/note_card.dart';
+import 'package:session_notes/models/note.dart';
 
-class NotesScreen extends StatelessWidget {
+class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
+
+  @override
+  State<NotesScreen> createState() => _NotesScreenState();
+}
+
+class _NotesScreenState extends State<NotesScreen> {
+  Future<List<NoteCard>> getNotes() async {
+    Note nota1 = Note("Anotação 1");
+    Note nota2 = Note("Anotação 2");
+    List<Note> listaNotas = [nota1, nota2];
+    List<NoteCard> listaCards = [];
+    for (var note in listaNotas) {
+      NoteCard card = NoteCard(note: note);
+      listaCards.add(card);
+    }
+    return listaCards;
+  }
+
+  Future<void> _refreshNotes() async {
+    setState(() {
+      getNotes();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +76,14 @@ class NotesScreen extends StatelessWidget {
               elevation: 2,
               side: BorderSide(width: 0.06, color: Colors.grey),
             ),
-            onPressed: () => {},
+            onPressed: () => {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return FinishSessionModal();
+                },
+              ),
+            },
             child: Row(
               children: [
                 Icon(Icons.check_circle_outline),
@@ -68,44 +102,47 @@ class NotesScreen extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF568C72).withOpacity(0.15),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/images/leaf.svg',
-                    width: 48,
-                    height: 48,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFF568C72),
-                      BlendMode.srcIn,
+        child: RefreshIndicator(
+          onRefresh: _refreshNotes,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF568C72).withOpacity(0.15),
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/images/leaf.svg',
+                      width: 48,
+                      height: 48,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF568C72),
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                "Sua sessão está vazia",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Anote pensamentos, sentimentos ou assuntos que deseja lembrar para sua próxima terapia.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w100),
-              ),
-            ],
+                const SizedBox(height: 32),
+                Text(
+                  "Sua sessão está vazia",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Anote pensamentos, sentimentos ou assuntos que deseja lembrar para sua próxima terapia.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.w100),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -115,7 +152,7 @@ class NotesScreen extends StatelessWidget {
             context: context,
             isScrollControlled: true,
             builder: (context) {
-              return Text("Olá");
+              return AddNoteModal();
             },
           );
         },
