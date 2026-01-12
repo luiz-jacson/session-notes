@@ -104,45 +104,70 @@ class _NotesScreenState extends State<NotesScreen> {
       body: Center(
         child: RefreshIndicator(
           onRefresh: _refreshNotes,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  width: 96,
-                  height: 96,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF568C72).withOpacity(0.15),
-                  ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      'assets/images/leaf.svg',
-                      width: 48,
-                      height: 48,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF568C72),
-                        BlendMode.srcIn,
+          child: FutureBuilder(
+            future: getNotes(),
+            builder: (context, asyncSnapshot) {
+              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (asyncSnapshot.hasError) {
+                return Center(child: Text("Erro ao carregar notas"));
+              }
+
+              if (!asyncSnapshot.hasData || asyncSnapshot.data!.isEmpty) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF568C72).withOpacity(0.15),
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/images/leaf.svg',
+                            width: 48,
+                            height: 48,
+                            colorFilter: const ColorFilter.mode(
+                              Color(0xFF568C72),
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 32),
+                      Text(
+                        "Sua sessão está vazia",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Anote pensamentos, sentimentos ou assuntos que deseja lembrar para sua próxima terapia.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.w100),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  "Sua sessão está vazia",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Anote pensamentos, sentimentos ou assuntos que deseja lembrar para sua próxima terapia.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w100),
-                ),
-              ],
-            ),
+                );
+              }
+
+              final listaNotas = asyncSnapshot.data!;
+
+              return GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                childAspectRatio: 1.1,
+                children: listaNotas,
+              );
+            },
           ),
         ),
       ),
